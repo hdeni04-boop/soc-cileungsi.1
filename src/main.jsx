@@ -285,7 +285,7 @@ createRoot(document.getElementById('react-shell')).render(
   <ConfigProvider
     theme={{
       token: {
-        colorPrimary: '#1677ff',
+        colorPrimary: '#ff3916',
         colorSuccess: '#389e0d',
         colorWarning: '#d48806',
         colorError: '#cf1322',
