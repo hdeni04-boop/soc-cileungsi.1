@@ -2416,9 +2416,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       ui.toast('Ijin ' + id + ' dibatalkan', 'info');
     },
     exportCSV: function() {
-      var csv = 'ID,Nama,Vendor,Alasan,Tanggal,Keluar,Kembali,Durasi,Batas,Status\n';
+      var csv = 'ID,Nama,Vendor,Workspace,Alasan,Tanggal,Keluar,Kembali,Durasi,Batas,Status\n';
       state.ijinLogs.forEach(function(l) {
-        csv += l.id + ',"' + (l.nama||'').replace(/"/g,'""') + '","' + (l.vendor||'').replace(/"/g,'""') + '",' +
+        csv += l.id + ',"' + (l.nama||'').replace(/"/g,'""') + '","' + (l.vendor||'').replace(/"/g,'""') + '","' + (l.workspaceName||l.workspaceSite||'').replace(/"/g,'""') + '",' +
           l.alasan + ',' + l.tgl + ',' + l.keluar + ',' + (l.kembali||'-') + ',' + (l.durasi||'-') + ',' + l.batas + 'm,' + l.status + '\n';
       });
       downloadBlob(csv, 'SOC_IjinKeluar.csv', 'text/csv');
