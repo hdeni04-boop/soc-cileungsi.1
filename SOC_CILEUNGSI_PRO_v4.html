@@ -1240,7 +1240,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     <div class="page-title-wrap">
       <div class="page-eyebrow">Reports</div>
       <div class="page-title">Laporan &amp; Print</div>
-      <div class="page-subtitle">Generate dan cetak laporan absensi</div>
+      <div class="page-subtitle">Buat, cetak, atau ekspor data sesuai tanggal dan vendor</div>
     </div>
   </div>
 
@@ -1267,7 +1267,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         <label class="field-label">Tipe Laporan</label>
         <select id="report-type" class="field-select">
           <option value="absensi">Rekap Absensi</option>
-          <option value="ijin">Ijin Keluar</option>
+          <option value="ijin">Izin Keluar</option>
           <option value="semua">Semua Data</option>
         </select>
       </div>
@@ -2676,51 +2676,76 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       var to    = ui.el('report-to') && ui.el('report-to').value    ? ui.el('report-to').value    : '';
       var vendor = ui.el('report-vendor') && ui.el('report-vendor').value ? ui.el('report-vendor').value : '';
       var type   = ui.el('report-type') && ui.el('report-type').value   ? ui.el('report-type').value   : 'absensi';
+      if (['absensi','ijin','semua'].indexOf(type) < 0) type = 'absensi';
 
       var result = ui.el('laporan-result');
       if (result) result.style.display = 'block';
 
-      var rows = state.logs.filter(function(l) {
-        if (from && l.tgl < from) return false;
-        if (to   && l.tgl > to)   return false;
-        var v2 = l.vendor || getVendor(l.id) || '';
-        if (vendor && v2.toLowerCase() !== vendor.toLowerCase()) return false;
-        return true;
-      });
+      var statusLabels = { diluar:'Di luar', overtime:'Terlambat', tepat_waktu:'Tepat waktu', dibatalkan:'Dibatalkan' };
+      var rows = [];
+      function includeRecord(record, kind) {
+        var recordDate = record.tgl || '';
+        var recordVendor = record.vendor || getVendor(record.id) || '';
+        if (from && recordDate < from) return;
+        if (to && recordDate > to) return;
+        if (vendor && recordVendor.toLowerCase() !== vendor.toLowerCase()) return;
 
+        var start = kind === 'absensi' ? record.in : record.keluar;
+        var end = kind === 'absensi' ? record.out : (record.kembali || '-');
+        var duration = kind === 'absensi' ? '-' : (record.durasi || '-');
+        if (kind === 'absensi' && end !== '-') {
+          var timeIn = parseDt(recordDate, start), timeOut = parseDt(recordDate, end);
+          if (timeIn && timeOut && !isNaN(timeIn) && !isNaN(timeOut)) duration = durStr(timeOut - timeIn);
+        }
+        rows.push({
+          kind: kind,
+          id: record.id,
+          name: record.nama || getNama(record.id) || record.id,
+          vendor: recordVendor,
+          date: recordDate,
+          start: start || '-',
+          end: end || '-',
+          duration: duration,
+          reason: record.alasan || '',
+          limit: record.batas || '',
+          status: statusLabels[record.status] || record.status || '',
+          note: kind === 'absensi' ? (record.remark || '') : (record.alasan || '')
+        });
+      }
+
+      if (type !== 'ijin') state.logs.forEach(function(record) { includeRecord(record, 'absensi'); });
+      if (type !== 'absensi') state.ijinLogs.forEach(function(record) { includeRecord(record, 'ijin'); });
+      rows.sort(function(a, b) { return b.date.localeCompare(a.date) || b.start.localeCompare(a.start); });
       state.laporanData = { rows: rows, type: type, from: from, to: to, vendor: vendor };
 
+      var typeLabels = { absensi:'Laporan Absensi', ijin:'Laporan Izin Keluar', semua:'Laporan Semua Data' };
       var meta = rows.length + ' rekaman';
       if (from || to) meta += ' | ' + (from||'*') + ' s/d ' + (to||'*');
       if (vendor) meta += ' | Vendor: ' + vendor;
       ui.setText('laporan-meta', meta);
-      ui.setText('laporan-title', 'Laporan Absensi' + (vendor ? ' — ' + vendor : ''));
+      ui.setText('laporan-title', typeLabels[type] + (vendor ? ' — ' + vendor : ''));
 
       var thead = ui.el('laporan-thead'), tbody = ui.el('laporan-tbody');
       if (!thead || !tbody) return;
 
-      thead.innerHTML = '<tr><th>No</th><th>ID</th><th>Nama</th><th>Vendor</th><th>Tanggal</th><th>Check-In</th><th>Check-Out</th><th>Durasi</th><th>Ket.</th></tr>';
+      var headers = type === 'ijin'
+        ? ['No','ID','Nama','Vendor','Tanggal','Keperluan','Keluar','Kembali','Durasi','Status']
+        : type === 'semua'
+          ? ['No','Jenis','ID','Nama','Vendor','Tanggal','Waktu Mulai','Waktu Selesai','Durasi','Keterangan / Status']
+          : ['No','ID','Nama','Vendor','Tanggal','Check-In','Check-Out','Durasi','Keterangan'];
+      thead.innerHTML = '<tr>' + headers.map(function(header) { return '<th>' + esc(header) + '</th>'; }).join('') + '</tr>';
       if (!rows.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="table-empty">Tidak ada data untuk filter ini</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="' + headers.length + '" class="table-empty">Tidak ada data untuk filter ini</td></tr>';
+        ui.toast('Tidak ada data untuk filter ini', 'info');
         return;
       }
-      tbody.innerHTML = rows.map(function(l, i) {
-        var dur = '-';
-        if (l.out !== '-') {
-          var tI = parseDt(l.tgl, l.in), tO = parseDt(l.tgl, l.out);
-          if (tI && tO && !isNaN(tI) && !isNaN(tO)) dur = durStr(tO-tI);
-        }
-        return '<tr>' +
-          '<td><span class="mono-cell">' + (i+1) + '</span></td>' +
-          '<td><span class="mono-cell" style="color:var(--electric);">' + esc(l.id) + '</span></td>' +
-          '<td style="color:var(--text-primary);">' + esc(l.nama||getNama(l.id)||l.id) + '</td>' +
-          '<td>' + esc(l.vendor||getVendor(l.id)) + '</td>' +
-          '<td><span class="mono-cell">' + esc(l.tgl) + '</span></td>' +
-          '<td><span class="mono-cell" style="color:var(--emerald);">' + esc(l.in) + '</span></td>' +
-          '<td><span class="mono-cell" style="color:' + (l.out==='-'?'var(--text-dim)':'var(--crimson)') + ';">' + esc(l.out) + '</span></td>' +
-          '<td><span class="mono-cell" style="color:var(--electric);">' + dur + '</span></td>' +
-          '<td style="font-size:11px;">' + esc(l.remark||'') + '</td>' +
-          '</tr>';
+      tbody.innerHTML = rows.map(function(row, index) {
+        var values = type === 'ijin'
+          ? [index+1,row.id,row.name,row.vendor,row.date,row.reason,row.start,row.end,row.duration,row.status]
+          : type === 'semua'
+            ? [index+1,row.kind === 'ijin' ? 'Izin Keluar' : 'Absensi',row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.kind === 'ijin' ? row.status : row.note]
+            : [index+1,row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.note];
+        return '<tr>' + values.map(function(value) { return '<td>' + esc(value == null || value === '' ? '-' : value) + '</td>'; }).join('') + '</tr>';
       }).join('');
       ui.toast(rows.length + ' data ditampilkan', 'success');
     },
@@ -2730,17 +2755,27 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     },
     exportCSV: function() {
       if (!state.laporanData) return ui.toast('Generate laporan dulu', 'warning');
-      var rows = state.laporanData.rows;
-      var csv = 'ID,Nama,Vendor,Tanggal,Masuk,Keluar,Durasi,Keterangan\n';
-      rows.forEach(function(l) {
-        var dur = '-';
-        if (l.out !== '-') {
-          var tI = parseDt(l.tgl, l.in), tO = parseDt(l.tgl, l.out);
-          if (tI && tO && !isNaN(tI) && !isNaN(tO)) dur = durStr(tO-tI);
-        }
-        csv += l.id + ',"' + (l.nama||'').replace(/"/g,'""') + '","' + (l.vendor||'').replace(/"/g,'""') + '",' + l.tgl + ',' + l.in + ',' + l.out + ',' + dur + ',"' + (l.remark||'').replace(/"/g,'""') + '"\n';
+      var report = state.laporanData;
+      var headers = report.type === 'ijin'
+        ? ['ID','Nama','Vendor','Tanggal','Keperluan','Keluar','Kembali','Durasi','Batas (menit)','Status']
+        : report.type === 'semua'
+          ? ['Jenis','ID','Nama','Vendor','Tanggal','Waktu Mulai','Waktu Selesai','Durasi','Keterangan / Status']
+          : ['ID','Nama','Vendor','Tanggal','Check-In','Check-Out','Durasi','Keterangan'];
+      function csvCell(value) {
+        var text = String(value == null ? '' : value);
+        if (/^[\t\r ]*[=+\-@]/.test(text)) text = "'" + text;
+        return '"' + text.replace(/"/g,'""') + '"';
+      }
+      var csv = headers.map(csvCell).join(',') + '\n';
+      report.rows.forEach(function(row) {
+        var values = report.type === 'ijin'
+          ? [row.id,row.name,row.vendor,row.date,row.reason,row.start,row.end,row.duration,row.limit,row.status]
+          : report.type === 'semua'
+            ? [row.kind === 'ijin' ? 'Izin Keluar' : 'Absensi',row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.kind === 'ijin' ? row.status : row.note]
+            : [row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.note];
+        csv += values.map(csvCell).join(',') + '\n';
       });
-      downloadBlob(csv, 'SOC_Laporan_' + todayStr() + '.csv', 'text/csv');
+      downloadBlob(csv, 'SOC_Laporan_' + report.type + '_' + todayStr() + '.csv', 'text/csv');
       ui.toast('Export laporan berhasil', 'success');
     }
   };
