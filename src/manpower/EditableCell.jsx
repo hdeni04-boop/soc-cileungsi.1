@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 export default function EditableCell({ value, onSave, className = '', label }) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
+  const [error, setError] = useState('');
   const inputRef = useRef(null);
 
   useEffect(() => {
@@ -17,7 +18,10 @@ export default function EditableCell({ value, onSave, className = '', label }) {
     const nextValue = Number(draft);
     if (draft.trim() !== '' && Number.isInteger(nextValue) && nextValue >= 0) {
       onSave(nextValue);
+      setError('');
       setEditing(false);
+    } else {
+      setError('Masukkan bilangan bulat minimal 0.');
     }
   };
 
@@ -30,8 +34,13 @@ export default function EditableCell({ value, onSave, className = '', label }) {
         min="0"
         step="1"
         aria-label={label}
+        aria-invalid={Boolean(error)}
+        title={error || undefined}
         value={draft}
-        onChange={(event) => setDraft(event.target.value)}
+        onChange={(event) => {
+          setDraft(event.target.value);
+          setError('');
+        }}
         onBlur={commit}
         onKeyDown={(event) => {
           if (event.key === 'Enter') {
@@ -40,6 +49,7 @@ export default function EditableCell({ value, onSave, className = '', label }) {
           }
           if (event.key === 'Escape') {
             setDraft(String(value));
+            setError('');
             setEditing(false);
           }
         }}
