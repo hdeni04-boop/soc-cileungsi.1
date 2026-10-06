@@ -2,6 +2,7 @@ import React, { useDeferredValue, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   App as AntApp,
+  Avatar,
   Badge,
   Button,
   ConfigProvider,
