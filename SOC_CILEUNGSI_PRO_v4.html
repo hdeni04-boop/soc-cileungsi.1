@@ -1547,8 +1547,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   function getVendor(id) { var r = state.karyawan[id]; return r ? (r.vendor || '') : ''; }
   function isMasuk(id)   { return state.logs.some(function(l) { return l.id === id && l.out === '-'; }); }
   function nowTime()     { return new Date().toLocaleTimeString('id-ID', {timeZone:'Asia/Jakarta'}); }
-  function nowDate()     { return new Date().toLocaleDateString('id-ID', {timeZone:'Asia/Jakarta', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-'); }
-  function todayStr()    { return new Date().toISOString().split('T')[0]; }
+  function nowDate(date) { return (date || new Date()).toLocaleDateString('id-ID', {timeZone:'Asia/Jakarta', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-'); }
+  function todayStr()    { return nowDate(); }
 
   function parseDt(tgl, t) {
     try {
@@ -1877,7 +1877,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       var days = {};
       for (var i = 6; i >= 0; i--) {
         var d = new Date(Date.now() - i * 86400000);
-        var dk = d.toISOString().split('T')[0];
+        var dk = nowDate(d);
         days[dk] = 0;
       }
       state.logs.forEach(function(l) { if (days[l.tgl] !== undefined) days[l.tgl]++; });
@@ -2901,7 +2901,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 
     /* Set default report dates */
     var today2 = todayStr();
-    var weekAgo = new Date(Date.now() - 7*86400000).toISOString().split('T')[0];
+    var weekAgo = nowDate(new Date(Date.now() - 7*86400000));
     if (ui.el('report-from')) ui.el('report-from').value = weekAgo;
     if (ui.el('report-to'))   ui.el('report-to').value   = today2;
 
