@@ -1,6 +1,6 @@
 import React, { createElement, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Button, Card, Input, Select, Switch, Table, Tag } from 'antd';
+import { Alert, Button, Card, Input, Modal, Select, Switch, Table, Tag, Upload } from 'antd';
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
@@ -20,6 +20,7 @@ import {
   FullscreenOutlined,
   HistoryOutlined,
   InfoCircleOutlined,
+  InboxOutlined,
   KeyOutlined,
   LogoutOutlined,
   PlusOutlined,
@@ -96,6 +97,7 @@ const roots = new WeakMap();
 const glyphSelectors = '.panel-title-accent, .search-icon, .scan-input-prefix, .upload-zone-icon, .modal-icon, .toast-icon, .nav-item-icon';
 const cardSelector = '.panel, .kpi-card, .scan-terminal, .chart-panel, .person-card';
 const controlSelector = '.btn, .field-input, .field-select, .field-textarea, .scan-field, .search-bar, .remark-input, .toggle-switch';
+const alertSelector = '.id-strip, .status-strip, .duration-strip, #ijin-overtime-alert, #import-stats, .overtime-alert-float, .toast';
 const tagColors = {
   'badge-electric': 'processing',
   'badge-emerald': 'success',
@@ -379,6 +381,136 @@ function LegacySwitch({ source }) {
   );
 }
 
+function getAlertType(source) {
+  const classes = source.className || '';
+  if (/error|invalid|keluar|overtime|crimson/.test(classes) || source.id === 'ijin-overtime-alert' || source.classList.contains('overtime-alert-float')) return 'error';
+  if (/warning|absent|amber/.test(classes)) return 'warning';
+  if (/success|found|masuk|emerald/.test(classes)) return 'success';
+  return 'info';
+}
+
+function getAlertMessage(source) {
+  if (source.classList.contains('toast')) {
+    return source.querySelector('[style*="flex:1"]')?.textContent.trim() || source.textContent.trim();
+  }
+  return source.textContent.replace(/\s+/g, ' ').trim();
+}
+
+function LegacyAlert({ source, host }) {
+  const [visible, setVisible] = useState(source.dataset.socOriginalVisible === 'true');
+  const [message, setMessage] = useState(() => getAlertMessage(source));
+  const [type, setType] = useState(() => getAlertType(source));
+  const toast = source.classList.contains('toast');
+  const floating = source.classList.contains('overtime-alert-float');
+
+  useEffect(() => {
+    const sync = () => {
+      const display = source.style.display;
+      setVisible(display ? display !== 'none' : source.dataset.socOriginalVisible === 'true');
+      setMessage(getAlertMessage(source));
+      setType(getAlertType(source));
+    };
+    const observer = new MutationObserver(sync);
+    observer.observe(source, { attributes: true, attributeFilter: ['class', 'style'], childList: true, subtree: true, characterData: true });
+    sync();
+
+    const parent = source.parentNode;
+    const removalObserver = new MutationObserver(() => {
+      if (source.isConnected) return;
+      observer.disconnect();
+      roots.get(host)?.unmount();
+      roots.delete(host);
+      host.remove();
+      removalObserver.disconnect();
+    });
+    if (parent) removalObserver.observe(parent, { childList: true });
+    return () => {
+      observer.disconnect();
+      removalObserver.disconnect();
+    };
+  }, [source, host]);
+
+  return (
+    <div className={`soc-ant-alert-host ${floating ? 'soc-ant-alert-float' : ''}`} style={{ display: visible ? 'block' : 'none' }}>
+      <Alert
+        className="soc-ant-alert"
+        type={type}
+        showIcon
+        message={message || 'Informasi'}
+        closable={toast}
+        onClose={() => source.remove()}
+        onClick={source.onclick ? () => source.click() : undefined}
+      />
+    </div>
+  );
+}
+
+function LegacyModal({ source, content }) {
+  const [open, setOpen] = useState(source.classList.contains('active'));
+  const contentRef = useRef(null);
+  useLayoutEffect(() => {
+    if (contentRef.current && content.childNodes.length) contentRef.current.appendChild(content);
+  }, [content]);
+  useEffect(() => {
+    const sync = () => setOpen(source.classList.contains('active'));
+    const observer = new MutationObserver(sync);
+    observer.observe(source, { attributes: true, attributeFilter: ['class'] });
+    sync();
+    return () => observer.disconnect();
+  }, [source]);
+
+  return (
+    <Modal
+      className="soc-ant-modal"
+      open={open}
+      title={null}
+      footer={null}
+      width={480}
+      centered
+      forceRender
+      onCancel={() => source.classList.remove('active')}
+    >
+      <div ref={contentRef} />
+    </Modal>
+  );
+}
+
+function LegacyUpload({ source }) {
+  const [copy, setCopy] = useState(() => source.textContent.trim());
+  const input = document.getElementById('file-input');
+  useEffect(() => {
+    const observer = new MutationObserver(() => setCopy(source.textContent.trim()));
+    observer.observe(source, { childList: true, subtree: true, characterData: true });
+    return () => observer.disconnect();
+  }, [source]);
+
+  const description = copy.split(/\n+/).map((line) => line.trim()).filter(Boolean);
+  const setNativeFiles = (file) => {
+    if (!input || !file) return;
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    input.files = transfer.files;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+
+  return (
+    <Upload.Dragger
+      className="soc-ant-upload"
+      accept={input?.accept}
+      multiple={false}
+      openFileDialogOnClick={false}
+      showUploadList={false}
+      beforeUpload={() => false}
+      onClick={() => input?.click()}
+      onChange={({ file }) => setNativeFiles(file.originFileObj || file)}
+    >
+      <p className="ant-upload-drag-icon"><InboxOutlined /></p>
+      <p className="ant-upload-text">{description[0] || 'Pilih file untuk diimpor'}</p>
+      <p className="ant-upload-hint">{description.slice(1).join(' ') || 'Excel atau CSV'}</p>
+    </Upload.Dragger>
+  );
+}
+
 function LegacyTag({ source }) {
   const { Icon, label } = findLeadingIcon(source.textContent);
   const color = Object.keys(tagColors).find((className) => source.classList.contains(className));
@@ -563,6 +695,42 @@ function upgradeTag(source) {
   mount(host, <LegacyTag source={source} />);
 }
 
+function upgradeAlert(source) {
+  if (source.dataset.socAntUpgraded) return;
+  source.dataset.socOriginalVisible = String(source.style.display
+    ? source.style.display !== 'none'
+    : getComputedStyle(source).display !== 'none');
+  source.dataset.socAntUpgraded = 'true';
+  const host = document.createElement('div');
+  host.className = 'soc-ant-alert-mount';
+  source.parentNode.insertBefore(host, source);
+  hideSource(source);
+  mount(host, <LegacyAlert source={source} host={host} />);
+}
+
+function upgradeModal(source) {
+  if (source.dataset.socAntUpgraded) return;
+  source.dataset.socAntUpgraded = 'true';
+  const content = document.createDocumentFragment();
+  const box = source.querySelector('.modal-box');
+  while (box?.firstChild) content.appendChild(box.firstChild);
+  const host = document.createElement('div');
+  host.className = 'soc-ant-modal-mount';
+  source.parentNode.insertBefore(host, source);
+  hideSource(source);
+  mount(host, <LegacyModal source={source} content={content} />);
+}
+
+function upgradeUpload(source) {
+  if (source.dataset.socAntUpgraded) return;
+  source.dataset.socAntUpgraded = 'true';
+  const host = document.createElement('div');
+  host.className = 'soc-ant-upload-host';
+  source.parentNode.insertBefore(host, source);
+  hideSource(source);
+  mount(host, <LegacyUpload source={source} />);
+}
+
 function upgradeGlyph(element) {
   if (element.dataset.socAntIcon) return;
   const { Icon, label } = findLeadingIcon(element.textContent);
@@ -619,6 +787,9 @@ function enhanceTree(rootNode) {
 
   find(cardSelector).forEach(upgradeCard);
   find('.data-table').forEach(upgradeTable);
+  find('.modal-overlay').forEach(upgradeModal);
+  find('.upload-zone').forEach(upgradeUpload);
+  find(alertSelector).forEach(upgradeAlert);
   find('.btn').forEach(upgradeButton);
   find('.field-input, .scan-field, .search-bar, .remark-input, .field-textarea').forEach(upgradeInput);
   find('.field-select').forEach(upgradeSelect);
