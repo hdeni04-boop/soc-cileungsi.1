@@ -1,40 +1,36 @@
 import React, { useDeferredValue, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import {
-  App as AntApp,
-  Avatar,
-  Badge,
-  Button,
-  ConfigProvider,
-  Drawer,
-  Input,
-  Layout,
-  List,
-  Menu,
-  Modal,
-  Select,
-  Space,
-  Typography
-} from 'antd';
-import {
-  ApartmentOutlined,
-  BarChartOutlined,
-  BellOutlined,
-  DatabaseOutlined,
-  DashboardOutlined,
-  FileTextOutlined,
-  FullscreenOutlined,
-  HistoryOutlined,
-  IdcardOutlined,
-  ImportOutlined,
-  MenuOutlined,
-  SearchOutlined,
-  SafetyOutlined,
-  SettingOutlined,
-  TeamOutlined,
-  UploadOutlined,
-  UserOutlined
-} from '@ant-design/icons';
+import AntApp from 'antd/es/app';
+import Avatar from 'antd/es/avatar';
+import Badge from 'antd/es/badge';
+import Button from 'antd/es/button';
+import ConfigProvider from 'antd/es/config-provider';
+import Drawer from 'antd/es/drawer';
+import Input from 'antd/es/input';
+import Layout from 'antd/es/layout';
+import List from 'antd/es/list';
+import Menu from 'antd/es/menu';
+import Modal from 'antd/es/modal';
+import Select from 'antd/es/select';
+import Space from 'antd/es/space';
+import Typography from 'antd/es/typography';
+import ApartmentOutlined from '@ant-design/icons/es/icons/ApartmentOutlined';
+import BarChartOutlined from '@ant-design/icons/es/icons/BarChartOutlined';
+import BellOutlined from '@ant-design/icons/es/icons/BellOutlined';
+import DatabaseOutlined from '@ant-design/icons/es/icons/DatabaseOutlined';
+import DashboardOutlined from '@ant-design/icons/es/icons/DashboardOutlined';
+import FileTextOutlined from '@ant-design/icons/es/icons/FileTextOutlined';
+import FullscreenOutlined from '@ant-design/icons/es/icons/FullscreenOutlined';
+import HistoryOutlined from '@ant-design/icons/es/icons/HistoryOutlined';
+import IdcardOutlined from '@ant-design/icons/es/icons/IdcardOutlined';
+import ImportOutlined from '@ant-design/icons/es/icons/ImportOutlined';
+import MenuOutlined from '@ant-design/icons/es/icons/MenuOutlined';
+import SearchOutlined from '@ant-design/icons/es/icons/SearchOutlined';
+import SafetyOutlined from '@ant-design/icons/es/icons/SafetyOutlined';
+import SettingOutlined from '@ant-design/icons/es/icons/SettingOutlined';
+import TeamOutlined from '@ant-design/icons/es/icons/TeamOutlined';
+import UploadOutlined from '@ant-design/icons/es/icons/UploadOutlined';
+import UserOutlined from '@ant-design/icons/es/icons/UserOutlined';
 import 'antd/dist/reset.css';
 import './main.css';
 import LegacyAntAdapter from './LegacyAntAdapter';

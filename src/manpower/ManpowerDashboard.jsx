@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
-import { CalendarOutlined, SaveOutlined, TeamOutlined } from '@ant-design/icons';
+import CalendarOutlined from '@ant-design/icons/es/icons/CalendarOutlined';
+import SaveOutlined from '@ant-design/icons/es/icons/SaveOutlined';
+import TeamOutlined from '@ant-design/icons/es/icons/TeamOutlined';
 import { manpowerGroups, mockManpowerRows } from './data';
 import TableHeader from './TableHeader';
 import TableRow from './TableRow';

@@ -1,30 +1,26 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Alert,
-  App as AntApp,
-  Avatar,
-  Button,
-  Card,
-  Col,
-  Form,
-  Input,
-  Modal,
-  Popconfirm,
-  Row,
-  Select,
-  Space,
-  Table,
-  Tag,
-  Typography
-} from 'antd';
-import {
-  CheckOutlined,
-  EditOutlined,
-  EnvironmentOutlined,
-  PlusOutlined,
-  StopOutlined,
-  UserOutlined
-} from '@ant-design/icons';
+import Alert from 'antd/es/alert';
+import AntApp from 'antd/es/app';
+import Avatar from 'antd/es/avatar';
+import Button from 'antd/es/button';
+import Card from 'antd/es/card';
+import Col from 'antd/es/col';
+import Form from 'antd/es/form';
+import Input from 'antd/es/input';
+import Modal from 'antd/es/modal';
+import Popconfirm from 'antd/es/popconfirm';
+import Row from 'antd/es/row';
+import Select from 'antd/es/select';
+import Space from 'antd/es/space';
+import Table from 'antd/es/table';
+import Tag from 'antd/es/tag';
+import Typography from 'antd/es/typography';
+import CheckOutlined from '@ant-design/icons/es/icons/CheckOutlined';
+import EditOutlined from '@ant-design/icons/es/icons/EditOutlined';
+import EnvironmentOutlined from '@ant-design/icons/es/icons/EnvironmentOutlined';
+import PlusOutlined from '@ant-design/icons/es/icons/PlusOutlined';
+import StopOutlined from '@ant-design/icons/es/icons/StopOutlined';
+import UserOutlined from '@ant-design/icons/es/icons/UserOutlined';
 
 const WORKSPACES_KEY = 'soc_workspaces';
 const ACTIVE_WORKSPACE_KEY = 'soc_active_workspace';

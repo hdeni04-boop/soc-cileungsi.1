@@ -1,39 +1,46 @@
 import React, { createElement, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Alert, Button, Card, Input, Modal, Select, Switch, Table, Tag, Upload } from 'antd';
-import {
-  ArrowDownOutlined,
-  ArrowUpOutlined,
-  BarChartOutlined,
-  BellOutlined,
-  CheckCircleOutlined,
-  CheckOutlined,
-  ClockCircleOutlined,
-  CloseOutlined,
-  DatabaseOutlined,
-  DeleteOutlined,
-  DownloadOutlined,
-  ExclamationCircleOutlined,
-  FileExcelOutlined,
-  FileTextOutlined,
-  FolderOpenOutlined,
-  FullscreenOutlined,
-  HistoryOutlined,
-  InfoCircleOutlined,
-  InboxOutlined,
-  KeyOutlined,
-  LogoutOutlined,
-  PlusOutlined,
-  PrinterOutlined,
-  ReloadOutlined,
-  SafetyOutlined,
-  SearchOutlined,
-  SettingOutlined,
-  TeamOutlined,
-  UploadOutlined,
-  UserOutlined,
-  WarningOutlined
-} from '@ant-design/icons';
+import Alert from 'antd/es/alert';
+import Button from 'antd/es/button';
+import Card from 'antd/es/card';
+import Input from 'antd/es/input';
+import Modal from 'antd/es/modal';
+import Select from 'antd/es/select';
+import Switch from 'antd/es/switch';
+import Table from 'antd/es/table';
+import Tag from 'antd/es/tag';
+import Upload from 'antd/es/upload';
+import ArrowDownOutlined from '@ant-design/icons/es/icons/ArrowDownOutlined';
+import ArrowUpOutlined from '@ant-design/icons/es/icons/ArrowUpOutlined';
+import BarChartOutlined from '@ant-design/icons/es/icons/BarChartOutlined';
+import BellOutlined from '@ant-design/icons/es/icons/BellOutlined';
+import CheckCircleOutlined from '@ant-design/icons/es/icons/CheckCircleOutlined';
+import CheckOutlined from '@ant-design/icons/es/icons/CheckOutlined';
+import ClockCircleOutlined from '@ant-design/icons/es/icons/ClockCircleOutlined';
+import CloseOutlined from '@ant-design/icons/es/icons/CloseOutlined';
+import DatabaseOutlined from '@ant-design/icons/es/icons/DatabaseOutlined';
+import DeleteOutlined from '@ant-design/icons/es/icons/DeleteOutlined';
+import DownloadOutlined from '@ant-design/icons/es/icons/DownloadOutlined';
+import ExclamationCircleOutlined from '@ant-design/icons/es/icons/ExclamationCircleOutlined';
+import FileExcelOutlined from '@ant-design/icons/es/icons/FileExcelOutlined';
+import FileTextOutlined from '@ant-design/icons/es/icons/FileTextOutlined';
+import FolderOpenOutlined from '@ant-design/icons/es/icons/FolderOpenOutlined';
+import FullscreenOutlined from '@ant-design/icons/es/icons/FullscreenOutlined';
+import HistoryOutlined from '@ant-design/icons/es/icons/HistoryOutlined';
+import InfoCircleOutlined from '@ant-design/icons/es/icons/InfoCircleOutlined';
+import InboxOutlined from '@ant-design/icons/es/icons/InboxOutlined';
+import KeyOutlined from '@ant-design/icons/es/icons/KeyOutlined';
+import LogoutOutlined from '@ant-design/icons/es/icons/LogoutOutlined';
+import PlusOutlined from '@ant-design/icons/es/icons/PlusOutlined';
+import PrinterOutlined from '@ant-design/icons/es/icons/PrinterOutlined';
+import ReloadOutlined from '@ant-design/icons/es/icons/ReloadOutlined';
+import SafetyOutlined from '@ant-design/icons/es/icons/SafetyOutlined';
+import SearchOutlined from '@ant-design/icons/es/icons/SearchOutlined';
+import SettingOutlined from '@ant-design/icons/es/icons/SettingOutlined';
+import TeamOutlined from '@ant-design/icons/es/icons/TeamOutlined';
+import UploadOutlined from '@ant-design/icons/es/icons/UploadOutlined';
+import UserOutlined from '@ant-design/icons/es/icons/UserOutlined';
+import WarningOutlined from '@ant-design/icons/es/icons/WarningOutlined';
 import './legacy-antd.css';
 
 const iconMap = {
