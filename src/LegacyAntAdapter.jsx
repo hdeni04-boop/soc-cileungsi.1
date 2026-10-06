@@ -135,6 +135,7 @@ function hostBefore(source, className) {
 function styleObject(element) {
   const style = {};
   for (const property of Array.from(element.style)) {
+    if (property === 'display' && element.dataset.socLegacySource) continue;
     const key = property.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
     style[key] = element.style.getPropertyValue(property);
   }
