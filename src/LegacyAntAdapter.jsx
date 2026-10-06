@@ -124,7 +124,6 @@ function hideSource(source) {
   source.dataset.socLegacySource = 'true';
   source.setAttribute('aria-hidden', 'true');
   source.tabIndex = -1;
-  source.style.setProperty('display', 'none', 'important');
 }
 
 function hostBefore(source, className) {
