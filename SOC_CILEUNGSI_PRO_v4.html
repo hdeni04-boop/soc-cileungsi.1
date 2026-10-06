@@ -2631,7 +2631,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       ui.toast('Data ' + nama + ' dihapus', 'info');
     },
     exportCSV: function() {
-      var csv = 'ID,Nama,Vendor,Tanggal,Masuk,Keluar,Durasi,Remarks\n';
+      var csv = 'ID,Nama,Vendor,Workspace,Tanggal,Masuk,Keluar,Durasi,Remarks\n';
       state.logs.forEach(function(l) {
         var dur = '-';
         if (l.out !== '-') {
@@ -2640,21 +2640,22 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         }
         var n = (l.nama || getNama(l.id) || l.id).replace(/"/g,'""');
         var v = (l.vendor || getVendor(l.id) || '').replace(/"/g,'""');
-        csv += l.id + ',"' + n + '","' + v + '",' + l.tgl + ',' + l.in + ',' + l.out + ',' + dur + ',' + (l.remark||'').replace(/,/g,';') + '\n';
+        var w = (l.workspaceName || l.workspaceSite || '').replace(/"/g,'""');
+        csv += l.id + ',"' + n + '","' + v + '","' + w + '",' + l.tgl + ',' + l.in + ',' + l.out + ',' + dur + ',' + (l.remark||'').replace(/,/g,';') + '\n';
       });
       downloadBlob(csv, 'SOC_CILEUNGSI_export_' + todayStr() + '.csv', 'text/csv');
       ui.toast('Export berhasil', 'success');
     },
     exportFullCSV: function() {
       var csv = '=== SOC CILEUNGSI — FULL EXPORT ===\n=== TANGGAL: ' + new Date().toLocaleString('id-ID') + ' ===\n\n';
-      csv += '=== LOGS ABSENSI ===\nID,Nama,Vendor,Tanggal,Masuk,Keluar,Remarks\n';
-      state.logs.forEach(function(l){ csv += l.id + ',"' + (l.nama||l.id).replace(/"/g,'""') + '","' + (l.vendor||'').replace(/"/g,'""') + '",' + l.tgl + ',' + l.in + ',' + l.out + ',"' + (l.remark||'').replace(/"/g,'""') + '"\n'; });
+      csv += '=== LOGS ABSENSI ===\nID,Nama,Vendor,Workspace,Tanggal,Masuk,Keluar,Remarks\n';
+      state.logs.forEach(function(l){ csv += l.id + ',"' + (l.nama||l.id).replace(/"/g,'""') + '","' + (l.vendor||'').replace(/"/g,'""') + '","' + (l.workspaceName||l.workspaceSite||'').replace(/"/g,'""') + '",' + l.tgl + ',' + l.in + ',' + l.out + ',"' + (l.remark||'').replace(/"/g,'""') + '"\n'; });
       csv += '\n=== REKAP ===\nID,Nama,Vendor,Total Masuk,Total Keluar\n';
       Object.keys(state.rekap).forEach(function(k){ var r = state.rekap[k]; csv += k + ',"' + (r.nama||k).replace(/"/g,'""') + '","' + (r.vendor||'').replace(/"/g,'""') + '",' + r.in + ',' + r.out + '\n'; });
       csv += '\n=== KARYAWAN ===\nID,Nama,Vendor\n';
       Object.keys(state.karyawan).forEach(function(k){ var r = state.karyawan[k]; csv += k + ',"' + r.nama.replace(/"/g,'""') + '","' + (r.vendor||'').replace(/"/g,'""') + '"\n'; });
-      csv += '\n=== IJIN KELUAR ===\nID,Nama,Alasan,Keluar,Kembali,Durasi,Status\n';
-      state.ijinLogs.forEach(function(l){ csv += l.id + ',"' + (l.nama||'').replace(/"/g,'""') + '",' + l.alasan + ',' + l.keluar + ',' + (l.kembali||'-') + ',' + (l.durasi||'-') + ',' + l.status + '\n'; });
+      csv += '\n=== IJIN KELUAR ===\nID,Nama,Workspace,Alasan,Keluar,Kembali,Durasi,Status\n';
+      state.ijinLogs.forEach(function(l){ csv += l.id + ',"' + (l.nama||'').replace(/"/g,'""') + '","' + (l.workspaceName||l.workspaceSite||'').replace(/"/g,'""') + '",' + l.alasan + ',' + l.keluar + ',' + (l.kembali||'-') + ',' + (l.durasi||'-') + ',' + l.status + '\n'; });
       downloadBlob(csv, 'SOC_FULL_export_' + todayStr() + '.csv', 'text/csv');
       ui.toast('Export lengkap berhasil', 'success');
     },
