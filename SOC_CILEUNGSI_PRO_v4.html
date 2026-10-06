@@ -1546,6 +1546,13 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   function getNama(id)   { var r = state.karyawan[id]; return r ? (r.nama || '') : ''; }
   function getVendor(id) { var r = state.karyawan[id]; return r ? (r.vendor || '') : ''; }
   function isMasuk(id)   { return state.logs.some(function(l) { return l.id === id && l.out === '-'; }); }
+  function getWorkspaceSnapshot() {
+    var workspaces = DB.get('soc_workspaces', []);
+    var activeId = DB.get('soc_active_workspace', '');
+    if (!Array.isArray(workspaces)) return {};
+    var workspace = workspaces.find(function(item) { return item.id === activeId && item.status !== 'archived'; });
+    return workspace ? { workspaceId: workspace.id, workspaceName: workspace.name, workspaceSite: workspace.site || '' } : {};
+  }
   function nowTime()     { return new Date().toLocaleTimeString('id-ID', {timeZone:'Asia/Jakarta'}); }
   function nowDate(date) { return (date || new Date()).toLocaleDateString('id-ID', {timeZone:'Asia/Jakarta', year:'numeric', month:'2-digit', day:'2-digit'}).split('/').reverse().join('-'); }
   function todayStr()    { return nowDate(); }
@@ -2220,7 +2227,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       if (isMasuk(v)) { audio.err(); return ui.toast('Sudah Check-In — gunakan Check-Out', 'warning'); }
       var nama = getNama(v) || v, vendor = getVendor(v) || '';
       var remark = (ui.el('remark-input') && ui.el('remark-input').value ? ui.el('remark-input').value.trim() : '');
-      state.logs.push({ id: v, nama: nama, vendor: vendor, tgl: todayStr(), in: nowTime(), out: '-', remark: remark });
+      state.logs.push(Object.assign({ id: v, nama: nama, vendor: vendor, tgl: todayStr(), in: nowTime(), out: '-', remark: remark }, getWorkspaceSnapshot()));
       if (!state.rekap[v]) state.rekap[v] = { in: 0, out: 0, nama: nama, vendor: vendor };
       state.rekap[v].in++;
       state.rekap[v].nama = nama; state.rekap[v].vendor = vendor;
@@ -2328,7 +2335,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       var alasan = (ui.el('ijin-alasan') && ui.el('ijin-alasan').value ? ui.el('ijin-alasan').value : 'Lainnya');
       var batas  = Math.max(1, parseInt((ui.el('ijin-batas') && ui.el('ijin-batas').value) || '15') || 15);
       var nama   = getNama(v) || v, vendor = getVendor(v) || '';
-      var record = { id:v, nama:nama, vendor:vendor, alasan:alasan, batas:batas, tgl:todayStr(), keluar:nowTime(), keluarMs:Date.now(), kembali:null, kembaliMs:null, durasi:null, status:'diluar' };
+      var record = Object.assign({ id:v, nama:nama, vendor:vendor, alasan:alasan, batas:batas, tgl:todayStr(), keluar:nowTime(), keluarMs:Date.now(), kembali:null, kembaliMs:null, durasi:null, status:'diluar' }, getWorkspaceSnapshot());
       state.ijinAktif[v] = record;
       state.ijinLogs.unshift(Object.assign({}, record));
       save.ijin(); audio.beep(700,0.15); ui.flash('flash-ok');
@@ -2638,6 +2645,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         ijinLogs:      state.ijinLogs,
         ijinAktif:     state.ijinAktif,
         importHistory: state.importHistory,
+        workspaces:    DB.get('soc_workspaces', []),
+        activeWorkspaceId: DB.get('soc_active_workspace', ''),
+        operatorProfile: DB.get('soc_operator_profile', {}),
         settings:      (function(){ var s = Object.assign({}, state.settings); delete s.adminPassword; return s; })()
       };
       downloadBlob(JSON.stringify(backup, null, 2), 'SOC_BACKUP_' + todayStr() + '.json', 'application/json');
@@ -2658,9 +2668,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           if (bk.ijinLogs)      { state.ijinLogs = bk.ijinLogs; }
           if (bk.ijinAktif)     { state.ijinAktif = bk.ijinAktif; }
           if (bk.importHistory) { state.importHistory = bk.importHistory; DB.set('soc_import_history', bk.importHistory); }
+          if (Array.isArray(bk.workspaces)) DB.set('soc_workspaces', bk.workspaces);
+          if (typeof bk.activeWorkspaceId === 'string') {
+            if (bk.activeWorkspaceId) DB.set('soc_active_workspace', bk.activeWorkspaceId);
+            else DB.remove('soc_active_workspace');
+          }
+          if (bk.operatorProfile && typeof bk.operatorProfile === 'object') DB.set('soc_operator_profile', bk.operatorProfile);
           if (bk.settings)      { state.settings = Object.assign({}, state.settings, bk.settings); save.settings(); }
           DB.set('soc_ijin_logs', state.ijinLogs);
           DB.set('soc_ijin_aktif', state.ijinAktif);
+          window.dispatchEvent(new CustomEvent('soc:workspace-change'));
+          window.dispatchEvent(new CustomEvent('soc:profile-change'));
           render.all(); render.settings(); render.importHistory();
           ui.toast('✓ Restore berhasil dari backup ' + (bk.timestamp||''), 'success');
           adminLog('Restore backup dari: ' + file.name);
@@ -2843,6 +2861,9 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       state.importHistory=[]; state.ijinLogs=[]; state.ijinAktif={};
       save.logs(); save.karyawan(); save.ijin();
       DB.set('soc_import_history', []);
+      DB.remove('soc_workspaces'); DB.remove('soc_active_workspace'); DB.remove('soc_operator_profile');
+      window.dispatchEvent(new CustomEvent('soc:workspace-change'));
+      window.dispatchEvent(new CustomEvent('soc:profile-change'));
       render.all(); render.importHistory();
       adminLog('HAPUS SEMUA DATA');
       ui.toast('Semua data dihapus', 'warning');
