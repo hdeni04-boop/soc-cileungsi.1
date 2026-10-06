@@ -208,9 +208,9 @@ function LegacyButton({ source }) {
   const originalClass = source.className;
   const tone = originalClass.includes('btn-electric') || originalClass.includes('btn-confirm-ready')
     ? 'primary'
-    : originalClass.includes('btn-crimson') || originalClass.includes('btn-solid-crimson')
+    : originalClass.includes('btn-crimson') || originalClass.includes('btn-solid-crimson') || originalClass.includes('sel-keluar')
       ? 'danger'
-      : originalClass.includes('btn-emerald') || originalClass.includes('btn-solid-emerald')
+      : originalClass.includes('btn-emerald') || originalClass.includes('btn-solid-emerald') || originalClass.includes('sel-masuk')
         ? 'success'
         : originalClass.includes('btn-amber')
           ? 'warning'
