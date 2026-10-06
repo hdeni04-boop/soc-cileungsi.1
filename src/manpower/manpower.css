@@ -26,8 +26,8 @@
 .manpower-summary-card strong small { color: #8b95a2; font-size: 11px; font-weight: 600; }
 .manpower-summary-caption { margin-top: 3px; color: #99a2ad; font-size: 10px; }
 .manpower-summary-card .manpower-status-unsaved, .manpower-summary-card .manpower-status-saved { font-size: 13px; }
-.manpower-status-saved { color: #258553 !important; }
 .manpower-status-unsaved { color: #b36d08 !important; }
+.manpower-status-neutral { color: #536273 !important; }
 .manpower-status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
 .manpower-table-card { overflow: hidden; border: 1px solid #e5e8ec; border-radius: 9px; background: #fff; box-shadow: 0 2px 8px rgba(27, 39, 54, .03); }
 .manpower-table-toolbar { display: flex; min-height: 74px; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 18px; }

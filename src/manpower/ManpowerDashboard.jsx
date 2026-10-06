@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { CalendarOutlined, SaveOutlined, TeamOutlined } from '@ant-design/icons';
 import { manpowerGroups, mockManpowerRows } from './data';
-import EditableCell from './EditableCell';
 import TableHeader from './TableHeader';
 import TableRow from './TableRow';
 import './manpower.css';
@@ -27,15 +26,25 @@ function calculateTotals(rows) {
 function loadDraft() {
   try {
     const draft = localStorage.getItem(DRAFT_STORAGE_KEY);
-    if (!draft) return mockManpowerRows;
+    if (!draft) return { rows: mockManpowerRows, message: '' };
     const parsed = JSON.parse(draft);
-    if (Array.isArray(parsed) && parsed.every((row) => row?.date && row?.shift && row?.dwOncall)) {
-      return parsed;
+    const validDraft = Array.isArray(parsed) && parsed.every((row) => (
+      typeof row?.date === 'string'
+      && typeof row?.shift === 'string'
+      && manpowerGroups.every((group) => group.categories.every((category) => (
+        category.fields.every((field) => {
+          const value = row[category.key]?.[field];
+          return Number.isInteger(value) && (field === 'gap' || value >= 0);
+        })
+      )))
+    ));
+    if (validDraft) {
+      return { rows: parsed, message: 'Draft lokal dimuat.' };
     }
+    return { rows: mockManpowerRows, message: 'Draft lokal tidak valid; data contoh digunakan.' };
   } catch {
-    return mockManpowerRows;
+    return { rows: mockManpowerRows, message: 'Draft lokal tidak dapat dibaca; data contoh digunakan.' };
   }
-  return mockManpowerRows;
 }
 
 function getGapToneClass(gap) {
@@ -45,10 +54,11 @@ function getGapToneClass(gap) {
 }
 
 export default function ManpowerDashboard() {
-  const [rows, setRows] = useState(loadDraft);
-  const [selectedDate, setSelectedDate] = useState(() => mockManpowerRows[0].date);
+  const [initialDraft] = useState(loadDraft);
+  const [rows, setRows] = useState(initialDraft.rows);
+  const [selectedDate, setSelectedDate] = useState(() => initialDraft.rows[0]?.date || mockManpowerRows[0].date);
   const [dirty, setDirty] = useState(false);
-  const [saveMessage, setSaveMessage] = useState('');
+  const [saveMessage, setSaveMessage] = useState(initialDraft.message);
   const dates = [...new Set(rows.map((row) => row.date))].sort();
   const visibleRows = rows
     .map((row, index) => ({ row, index }))
@@ -99,7 +109,7 @@ export default function ManpowerDashboard() {
           </div>
           <button type="button" className="manpower-save-button" onClick={saveDraft}>
             <SaveOutlined />
-            {dirty ? 'Simpan draft' : 'Simpan draft lokal'}
+            {dirty ? 'Simpan perubahan' : 'Simpan draft lokal'}
           </button>
         </header>
 
@@ -121,11 +131,13 @@ export default function ManpowerDashboard() {
           </article>
           <article className="manpower-summary-card">
             <span className="manpower-summary-label">STATUS DATA</span>
-            <strong className={dirty ? 'manpower-status-unsaved' : 'manpower-status-saved'}>
+            <strong className={dirty ? 'manpower-status-unsaved' : 'manpower-status-neutral'}>
               <span className="manpower-status-dot" />
-              {dirty ? 'Belum disimpan' : 'Draft lokal'}
+              {dirty ? 'Belum disimpan' : 'Siap diedit'}
             </strong>
-            <span className="manpower-summary-caption">Perubahan tersimpan di sesi lokal</span>
+            <span className="manpower-summary-caption">
+              {dirty ? 'Perubahan tersimpan sementara di sesi' : 'Draft disimpan lokal saat diminta'}
+            </span>
           </article>
         </section>
 
