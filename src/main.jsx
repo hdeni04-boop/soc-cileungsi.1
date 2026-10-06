@@ -32,6 +32,7 @@ import {
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import './main.css';
+import LegacyAntAdapter from './LegacyAntAdapter';
 
 const navigation = [
   {
@@ -203,6 +204,7 @@ function Shell() {
 
   return (
     <AntApp>
+      <LegacyAntAdapter />
       <Layout.Sider className="soc-sider" width={248} theme="light">
         <SidebarContent selected={selected} onNavigate={navigate} onOpenSearch={openSearch} />
       </Layout.Sider>

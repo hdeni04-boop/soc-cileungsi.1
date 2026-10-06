@@ -516,21 +516,6 @@ function upgradeButton(source) {
   mount(host, <LegacyButton source={source} />);
 }
 
-function installValueBridge(source, handler) {
-  const descriptor = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(source), 'value');
-  if (!descriptor?.get || !descriptor?.set || source.dataset.socValueBridge) return;
-  Object.defineProperty(source, 'value', {
-    configurable: true,
-    get() { return descriptor.get.call(this); },
-    set(value) {
-      descriptor.set.call(this, value);
-      this.dispatchEvent(new Event('soc:legacy-value'));
-    }
-  });
-  source.dataset.socValueBridge = 'true';
-  source.addEventListener('soc:legacy-value', handler);
-}
-
 function upgradeInput(source) {
   if (source.dataset.socAntUpgraded) return;
   source.dataset.socAntUpgraded = 'true';
@@ -538,21 +523,13 @@ function upgradeInput(source) {
   const host = hostBefore(source, 'soc-ant-control-host soc-ant-input-host');
   source.classList.add('soc-ant-source-input');
   hideSource(source);
-  const stopFocus = source.focus.bind(source);
-  const rootRef = { current: null };
-  source.focus = (options) => rootRef.current?.focus(options) || stopFocus(options);
   const visibleId = source.id ? `${source.id}-antd` : undefined;
   const group = source.closest('.field-group');
   const label = group?.querySelector('.field-label')?.textContent.trim();
-  const bridge = () => source.dispatchEvent(new Event('soc:legacy-value'));
-  installValueBridge(source, bridge);
   if (visibleId) {
     document.querySelectorAll(`label[for="${source.id}"]`).forEach((fieldLabel) => { fieldLabel.htmlFor = visibleId; });
   }
-  const content = (
-    <LegacyInput source={source} multiline={multiline} />
-  );
-  mount(host, React.cloneElement(content, { ref: (control) => { rootRef.current = control; } }));
+  mount(host, <LegacyInput source={source} multiline={multiline} />);
 }
 
 function upgradeSelect(source) {
@@ -560,7 +537,6 @@ function upgradeSelect(source) {
   source.dataset.socAntUpgraded = 'true';
   const host = hostBefore(source, 'soc-ant-control-host soc-ant-select-host');
   hideSource(source);
-  installValueBridge(source, () => source.dispatchEvent(new Event('soc:legacy-value')));
   mount(host, <LegacySelect source={source} />);
 }
 
