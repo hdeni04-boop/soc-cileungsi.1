@@ -201,6 +201,7 @@ function LegacyButton({ source }) {
   useEffect(() => {
     const observer = new MutationObserver(() => setVersion((value) => value + 1));
     observer.observe(source, { attributes: true, attributeFilter: ['class', 'disabled', 'style', 'title'] });
+    setVersion((value) => value + 1);
     return () => observer.disconnect();
   }, [source]);
 
@@ -250,6 +251,7 @@ function LegacyInput({ source, multiline = false }) {
   useEffect(() => {
     const syncValue = () => setValue(source.value);
     const stopBridge = bridgeValue(source, syncValue);
+    syncValue();
     originalFocus.current = source.focus.bind(source);
     source.focus = (options) => {
       const control = controlRef.current;
@@ -324,8 +326,10 @@ function LegacySelect({ source }) {
   useEffect(() => {
     const syncValue = () => setValue(source.value);
     const stopBridge = bridgeValue(source, syncValue);
+    syncValue();
     const observer = new MutationObserver(() => setOptions(readSelectOptions(source)));
     observer.observe(source, { childList: true, subtree: true, characterData: true, attributes: true });
+    setOptions(readSelectOptions(source));
     return () => {
       stopBridge();
       observer.disconnect();
@@ -361,6 +365,7 @@ function LegacySwitch({ source }) {
   useEffect(() => {
     const observer = new MutationObserver(() => setChecked(source.classList.contains('on')));
     observer.observe(source, { attributes: true, attributeFilter: ['class'] });
+    setChecked(source.classList.contains('on'));
     return () => observer.disconnect();
   }, [source]);
   const settingLabel = source.closest('.setting-row')?.querySelector('.setting-info label')?.textContent.trim();
@@ -404,6 +409,7 @@ function LegacyCard({ source, content, kind }) {
   useEffect(() => {
     const observer = new MutationObserver(() => setBorderColor(source.style.borderColor));
     observer.observe(source, { attributes: true, attributeFilter: ['style', 'class'] });
+    setBorderColor(source.style.borderColor);
     return () => observer.disconnect();
   }, [source]);
 
@@ -438,6 +444,7 @@ function LegacyTable({ source }) {
   useEffect(() => {
     const observer = new MutationObserver(() => setSnapshot(readTable(source)));
     observer.observe(source, { childList: true, subtree: true, characterData: true });
+    setSnapshot(readTable(source));
     return () => observer.disconnect();
   }, [source]);
 
