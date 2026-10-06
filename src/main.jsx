@@ -157,6 +157,7 @@ function Shell() {
     const handleNavigation = (event) => {
       setSelected(event.detail);
       setMobileOpen(false);
+      setCommandOpen(false);
     };
     const handleBadge = (event) => setIjinCount(event.detail);
     const handleShortcut = (event) => {
