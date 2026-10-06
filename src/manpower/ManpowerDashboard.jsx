@@ -38,12 +38,7 @@ function loadDraft() {
   return mockManpowerRows;
 }
 
-function getGapToneClass(rows) {
-  const gap = rows.reduce((sum, row) => (
-    sum + Object.values(row).reduce((rowSum, value) => (
-      rowSum + (value && typeof value === 'object' ? value.gap || 0 : 0)
-    ), 0)
-  ), 0);
+function getGapToneClass(gap) {
   if (gap < 0) return 'manpower-gap-negative';
   if (gap > 0) return 'manpower-gap-positive';
   return 'manpower-gap-neutral';
@@ -128,7 +123,7 @@ export default function ManpowerDashboard() {
             <span className="manpower-summary-label">STATUS DATA</span>
             <strong className={dirty ? 'manpower-status-unsaved' : 'manpower-status-saved'}>
               <span className="manpower-status-dot" />
-              {dirty ? 'Belum disimpan' : 'Tersinkron lokal'}
+              {dirty ? 'Belum disimpan' : 'Draft lokal'}
             </strong>
             <span className="manpower-summary-caption">Perubahan tersimpan di sesi lokal</span>
           </article>
@@ -191,7 +186,7 @@ export default function ManpowerDashboard() {
                           key={`${category.key}-${field}`}
                           className={[
                             field === 'unplan' ? 'manpower-unplan-cell' : '',
-                            isGap ? getGapToneClass(visibleRows.map(({ row }) => row)) : ''
+                            isGap ? getGapToneClass(value) : ''
                           ].filter(Boolean).join(' ')}
                         >
                           {value}

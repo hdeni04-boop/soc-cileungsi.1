@@ -46,6 +46,7 @@ import {
   ProfileManagement,
   WorkspaceManagement
 } from './management';
+import ManpowerDashboard from './manpower/ManpowerDashboard';
 
 const navigation = [
   {
@@ -72,6 +73,7 @@ const navigation = [
     label: 'DATA',
     children: [
       { key: 'karyawan', icon: <TeamOutlined />, label: 'Data Karyawan' },
+      { key: 'manpower', icon: <TeamOutlined />, label: 'Manpower Management' },
       { key: 'impor', icon: <ImportOutlined />, label: 'Impor Data' }
     ]
   },
@@ -326,6 +328,7 @@ function Shell() {
           )}
         </main>
       )}
+      {selected === 'manpower' && <ManpowerDashboard />}
       <Modal
         title="Pencarian cepat"
         open={commandOpen}
