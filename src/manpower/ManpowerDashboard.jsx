@@ -60,9 +60,9 @@ export default function ManpowerDashboard() {
   const [dirty, setDirty] = useState(false);
   const [saveMessage, setSaveMessage] = useState(initialDraft.message);
   const dates = [...new Set(rows.map((row) => row.date))].sort();
-  const visibleRows = rows
+  const visibleRows = useMemo(() => rows
     .map((row, index) => ({ row, index }))
-    .filter(({ row }) => row.date === selectedDate);
+    .filter(({ row }) => row.date === selectedDate), [rows, selectedDate]);
   const totals = useMemo(() => calculateTotals(visibleRows.map(({ row }) => row)), [visibleRows]);
   const totalHeadcount = useMemo(() => (
     visibleRows.reduce((sum, { row }) => sum + manpowerGroups.reduce((groupSum, group) => (

@@ -37,17 +37,18 @@ function allocation(plan: number, act: number) {
   return { plan, act, gap: act - plan };
 }
 
+const mockDate = getLocalDate();
+
 export const mockManpowerRows: ManpowerRow[] = Array.from({ length: 24 }, (_, hour) => {
-  const date = getLocalDate();
   const dedicatedPlan = 3 + (hour % 3);
   const regularPlan = 2 + (hour % 2);
   const oncallPlan = 1 + (hour % 2);
   const dedicatedEhaPlan = 2 + (hour % 3 === 0 ? 1 : 0);
   const regularEhaPlan = 2;
-  const diPlan = 1 + (hour % 4 === 0 ? 1 : 0);
+  const diPlan = 2 + (hour % 4 === 0 ? 1 : 0);
 
   return {
-    date,
+    date: mockDate,
     shift: makeShift(hour),
     dedicated: allocation(dedicatedPlan, dedicatedPlan + ((hour % 5) - 2)),
     dwReguler: allocation(regularPlan, regularPlan + ((hour % 3) - 1)),
