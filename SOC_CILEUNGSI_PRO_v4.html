@@ -1660,6 +1660,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   };
 
   /* ── RENDER ───────────────────────────────────────────────── */
+  var chartTextColor = '#595959';
+  var chartGridColor = 'rgba(0,0,0,0.08)';
   var render = {
     all: function() {
       render.stats(); render.history(); render.rekap();
@@ -1855,14 +1857,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         type: 'bar',
         data: {
           labels: filtered.map(function(id){ return getNama(id) || id; }),
-          datasets: [{ label: 'Frekuensi Keluar', data: filtered.map(function(id){ return countOut[id]; }), backgroundColor: 'rgba(255,61,90,0.25)', borderColor: 'rgba(255,61,90,0.9)', borderWidth: 1, borderRadius: 6 }]
+          datasets: [{ label: 'Frekuensi Keluar', data: filtered.map(function(id){ return countOut[id]; }), backgroundColor: 'rgba(207,19,34,0.14)', borderColor: '#cf1322', borderWidth: 1, borderRadius: 6 }]
         },
         options: {
           responsive: true,
-          plugins: { legend: { labels: { color: '#4e6880', font: { family: 'IBM Plex Mono', size: 11 } } } },
+          plugins: { legend: { labels: { color: chartTextColor, font: { family: 'Segoe UI', size: 12 } } } },
           scales: {
-            y: { beginAtZero: true, ticks: { color: '#4e6880', stepSize: 1, font: { family: 'IBM Plex Mono' } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-            x: { ticks: { color: '#8ba3bc', font: { family: 'Plus Jakarta Sans', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+            y: { beginAtZero: true, ticks: { color: chartTextColor, stepSize: 1, font: { family: 'Segoe UI' } }, grid: { color: chartGridColor } },
+            x: { ticks: { color: chartTextColor, font: { family: 'Segoe UI', size: 12 } }, grid: { color: chartGridColor } }
           }
         }
       });
@@ -1888,14 +1890,14 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         type: 'line',
         data: {
           labels: labels,
-          datasets: [{ label: 'Check-In', data: data, borderColor: 'rgba(0,200,255,0.9)', backgroundColor: 'rgba(0,200,255,0.08)', tension: 0.4, fill: true, pointBackgroundColor: 'var(--electric)', pointRadius: 4, borderWidth: 2 }]
+          datasets: [{ label: 'Check-In', data: data, borderColor: '#1677ff', backgroundColor: 'rgba(22,119,255,0.10)', tension: 0.4, fill: true, pointBackgroundColor: '#1677ff', pointRadius: 4, borderWidth: 2 }]
         },
         options: {
           responsive: true,
-          plugins: { legend: { labels: { color: '#4e6880', font: { family: 'IBM Plex Mono', size: 11 } } } },
+          plugins: { legend: { labels: { color: chartTextColor, font: { family: 'Segoe UI', size: 12 } } } },
           scales: {
-            y: { beginAtZero: true, ticks: { color: '#4e6880', stepSize: 1, font: { family: 'IBM Plex Mono' } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-            x: { ticks: { color: '#8ba3bc', font: { family: 'Plus Jakarta Sans', size: 11 } }, grid: { color: 'rgba(255,255,255,0.04)' } }
+            y: { beginAtZero: true, ticks: { color: chartTextColor, stepSize: 1, font: { family: 'Segoe UI' } }, grid: { color: chartGridColor } },
+            x: { ticks: { color: chartTextColor, font: { family: 'Segoe UI', size: 12 } }, grid: { color: chartGridColor } }
           }
         }
       });
@@ -1918,18 +1920,18 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       }
       canvas.style.display = 'block';
       if (emptyEl) emptyEl.style.display = 'none';
-      var colors = ['rgba(0,200,255,0.7)','rgba(0,229,160,0.7)','rgba(255,170,0,0.7)','rgba(168,85,247,0.7)','rgba(255,61,90,0.7)','rgba(100,200,100,0.7)'];
+      var colors = ['#1677ff','#52c41a','#faad14','#722ed1','#eb2f96','#13c2c2'];
       if (state.chartInstance) { state.chartInstance.destroy(); state.chartInstance = null; }
       state.chartInstance = new Chart(canvas, {
         type: 'doughnut',
         data: {
           labels: labels,
-          datasets: [{ data: labels.map(function(l){ return vendors[l]; }), backgroundColor: colors, borderColor: 'var(--surface-2)', borderWidth: 2 }]
+          datasets: [{ data: labels.map(function(l){ return vendors[l]; }), backgroundColor: colors, borderColor: '#ffffff', borderWidth: 2 }]
         },
         options: {
           responsive: true,
           plugins: {
-            legend: { position: 'bottom', labels: { color: '#8ba3bc', font: { family: 'Plus Jakarta Sans', size: 11 }, padding: 16 } }
+            legend: { position: 'bottom', labels: { color: chartTextColor, font: { family: 'Segoe UI', size: 12 }, padding: 16 } }
           }
         }
       });
