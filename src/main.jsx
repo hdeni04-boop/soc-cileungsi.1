@@ -11,10 +11,12 @@ import {
   List,
   Menu,
   Modal,
+  Select,
   Space,
   Typography
 } from 'antd';
 import {
+  ApartmentOutlined,
   BarChartOutlined,
   BellOutlined,
   DatabaseOutlined,
@@ -22,17 +24,27 @@ import {
   FileTextOutlined,
   FullscreenOutlined,
   HistoryOutlined,
+  IdcardOutlined,
   ImportOutlined,
   MenuOutlined,
   SearchOutlined,
   SafetyOutlined,
   SettingOutlined,
   TeamOutlined,
-  UploadOutlined
+  UploadOutlined,
+  UserOutlined
 } from '@ant-design/icons';
 import 'antd/dist/reset.css';
 import './main.css';
 import LegacyAntAdapter from './LegacyAntAdapter';
+import {
+  loadOperatorProfile,
+  loadWorkspaceStore,
+  persistOperatorProfile,
+  persistWorkspaceStore,
+  ProfileManagement,
+  WorkspaceManagement
+} from './management';
 
 const navigation = [
   {
@@ -60,6 +72,14 @@ const navigation = [
     children: [
       { key: 'karyawan', icon: <TeamOutlined />, label: 'Data Karyawan' },
       { key: 'impor', icon: <ImportOutlined />, label: 'Impor Data' }
+    ]
+  },
+  {
+    type: 'group',
+    label: 'PENGELOLAAN',
+    children: [
+      { key: 'workspace', icon: <ApartmentOutlined />, label: 'Workspace Management' },
+      { key: 'profile', icon: <IdcardOutlined />, label: 'Profil Operator' }
     ]
   },
   {
@@ -102,7 +122,20 @@ function findEmployees(query) {
   }
 }
 
-function SidebarContent({ selected, onNavigate, onOpenSearch, mobile = false }) {
+function SidebarContent({
+  selected,
+  onNavigate,
+  onOpenSearch,
+  workspaceStore,
+  activeWorkspace,
+  profile,
+  onWorkspaceChange,
+  mobile = false
+}) {
+  const availableWorkspaces = workspaceStore.workspaces
+    .filter((workspace) => workspace.status !== 'archived')
+    .map((workspace) => ({ value: workspace.id, label: `${workspace.name} · ${workspace.site}` }));
+
   return (
     <>
       <div className="soc-brand">
@@ -116,6 +149,17 @@ function SidebarContent({ selected, onNavigate, onOpenSearch, mobile = false }) 
           <span id="sidebar-date">Memuat waktu...</span>
         </div>
       )}
+      <div className="soc-workspace-picker">
+        <Typography.Text type="secondary">Workspace aktif</Typography.Text>
+        <Select
+          size="small"
+          value={activeWorkspace?.id}
+          options={availableWorkspaces}
+          placeholder="Pilih workspace"
+          aria-label="Workspace aktif"
+          onChange={onWorkspaceChange}
+        />
+      </div>
       <Button
         className="soc-quick-search"
         block
@@ -126,6 +170,18 @@ function SidebarContent({ selected, onNavigate, onOpenSearch, mobile = false }) 
         Cari halaman atau karyawan
       </Button>
       <NavigationMenu selected={selected} onNavigate={onNavigate} />
+      <Button
+        className="soc-profile-summary"
+        type="text"
+        block
+        icon={<Avatar size="small" icon={<UserOutlined />}>{profile.name?.trim().split(/\s+/).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('')}</Avatar>}
+        onClick={() => onNavigate('profile')}
+      >
+        <span className="soc-profile-summary-text">
+          <strong>{profile.name || 'Atur profil operator'}</strong>
+          <span>{profile.role || 'Profil lokal'}</span>
+        </span>
+      </Button>
       {!mobile && (
         <Space className="soc-tools" size={4}>
           <Button type="text" icon={<BellOutlined />} title="Aktifkan notifikasi" onClick={() => window.App?.notif.requestPermission()}>Notif</Button>
@@ -144,6 +200,9 @@ function Shell() {
   const [ijinCount, setIjinCount] = useState(0);
   const [commandOpen, setCommandOpen] = useState(false);
   const [commandQuery, setCommandQuery] = useState('');
+  const [workspaceStore, setWorkspaceStore] = useState(loadWorkspaceStore);
+  const [profile, setProfile] = useState(loadOperatorProfile);
+  const activeWorkspace = workspaceStore.workspaces.find((workspace) => workspace.id === workspaceStore.activeWorkspaceId);
   const deferredQuery = useDeferredValue(commandQuery.trim().toLowerCase());
   const commands = navigation.flatMap((group) => group.children).map((item) => ({
     key: item.key,
@@ -161,6 +220,8 @@ function Shell() {
       setCommandOpen(false);
     };
     const handleBadge = (event) => setIjinCount(event.detail);
+    const handleWorkspaceChange = (event) => setWorkspaceStore(event.detail || loadWorkspaceStore());
+    const handleProfileChange = (event) => setProfile(event.detail || loadOperatorProfile());
     const handleShortcut = (event) => {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
         event.preventDefault();
@@ -170,10 +231,14 @@ function Shell() {
     };
     window.addEventListener('soc:navigate', handleNavigation);
     window.addEventListener('soc:badge', handleBadge);
+    window.addEventListener('soc:workspace-change', handleWorkspaceChange);
+    window.addEventListener('soc:profile-change', handleProfileChange);
     window.addEventListener('keydown', handleShortcut);
     return () => {
       window.removeEventListener('soc:navigate', handleNavigation);
       window.removeEventListener('soc:badge', handleBadge);
+      window.removeEventListener('soc:workspace-change', handleWorkspaceChange);
+      window.removeEventListener('soc:profile-change', handleProfileChange);
       window.removeEventListener('keydown', handleShortcut);
     };
   }, []);
@@ -188,6 +253,16 @@ function Shell() {
     setCommandQuery('');
     setMobileOpen(false);
     setCommandOpen(true);
+  };
+
+  const updateWorkspaceStore = (nextStore) => {
+    persistWorkspaceStore(nextStore);
+    setWorkspaceStore(nextStore);
+  };
+
+  const updateProfile = (nextProfile) => {
+    persistOperatorProfile(nextProfile);
+    setProfile(nextProfile);
   };
 
   const selectEmployee = (employee) => {
@@ -206,7 +281,15 @@ function Shell() {
     <AntApp>
       <LegacyAntAdapter />
       <Layout.Sider className="soc-sider" width={248} theme="light">
-        <SidebarContent selected={selected} onNavigate={navigate} onOpenSearch={openSearch} />
+        <SidebarContent
+          selected={selected}
+          onNavigate={navigate}
+          onOpenSearch={openSearch}
+          workspaceStore={workspaceStore}
+          activeWorkspace={activeWorkspace}
+          profile={profile}
+          onWorkspaceChange={(workspaceId) => updateWorkspaceStore({ ...workspaceStore, activeWorkspaceId: workspaceId })}
+        />
       </Layout.Sider>
       <header className="soc-mobile-header">
         <Button type="text" icon={<MenuOutlined />} aria-label="Buka menu" onClick={() => setMobileOpen(true)} />
@@ -222,8 +305,26 @@ function Shell() {
         onClose={() => setMobileOpen(false)}
         styles={{ body: { padding: 0, display: 'flex', flexDirection: 'column' } }}
       >
-        <SidebarContent selected={selected} onNavigate={navigate} onOpenSearch={openSearch} mobile />
+        <SidebarContent
+          selected={selected}
+          onNavigate={navigate}
+          onOpenSearch={openSearch}
+          workspaceStore={workspaceStore}
+          activeWorkspace={activeWorkspace}
+          profile={profile}
+          onWorkspaceChange={(workspaceId) => updateWorkspaceStore({ ...workspaceStore, activeWorkspaceId: workspaceId })}
+          mobile
+        />
       </Drawer>
+      {(selected === 'workspace' || selected === 'profile') && (
+        <main className="soc-management-page">
+          {selected === 'workspace' ? (
+            <WorkspaceManagement store={workspaceStore} onStoreChange={updateWorkspaceStore} />
+          ) : (
+            <ProfileManagement profile={profile} onSave={updateProfile} activeWorkspace={activeWorkspace} />
+          )}
+        </main>
+      )}
       <Modal
         title="Pencarian cepat"
         open={commandOpen}
