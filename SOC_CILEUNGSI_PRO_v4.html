@@ -1264,6 +1264,12 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
         </select>
       </div>
       <div class="field-group">
+        <label class="field-label">Workspace</label>
+        <select id="report-workspace" class="field-select">
+          <option value="">Semua Workspace</option>
+        </select>
+      </div>
+      <div class="field-group">
         <label class="field-label">Tipe Laporan</label>
         <select id="report-type" class="field-select">
           <option value="absensi">Rekap Absensi</option>
@@ -2135,6 +2141,22 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       });
     },
 
+    populateWorkspaceFilters: function() {
+      var select = ui.el('report-workspace');
+      if (!select) return;
+      var current = select.value;
+      while (select.options.length > 1) select.remove(1);
+      var workspaces = DB.get('soc_workspaces', []);
+      if (Array.isArray(workspaces)) workspaces.forEach(function(workspace) {
+        if (!workspace || !workspace.id || !workspace.name) return;
+        var option = document.createElement('option');
+        option.value = workspace.id;
+        option.text = workspace.name + (workspace.site ? ' · ' + workspace.site : '');
+        select.appendChild(option);
+      });
+      if (current && Array.from(select.options).some(function(option) { return option.value === current; })) select.value = current;
+    },
+
     navBadge: function() {
       var cnt = Object.keys(state.ijinAktif).length;
       var badge = ui.el('ijin-badge');
@@ -2695,6 +2717,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       var from  = ui.el('report-from') && ui.el('report-from').value  ? ui.el('report-from').value  : '';
       var to    = ui.el('report-to') && ui.el('report-to').value    ? ui.el('report-to').value    : '';
       var vendor = ui.el('report-vendor') && ui.el('report-vendor').value ? ui.el('report-vendor').value : '';
+      var workspaceId = ui.el('report-workspace') && ui.el('report-workspace').value ? ui.el('report-workspace').value : '';
       var type   = ui.el('report-type') && ui.el('report-type').value   ? ui.el('report-type').value   : 'absensi';
       if (['absensi','ijin','semua'].indexOf(type) < 0) type = 'absensi';
 
@@ -2706,6 +2729,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       function includeRecord(record, kind) {
         var recordDate = record.tgl || '';
         var recordVendor = record.vendor || getVendor(record.id) || '';
+        if (workspaceId && record.workspaceId !== workspaceId) return;
         if (from && recordDate < from) return;
         if (to && recordDate > to) return;
         if (vendor && recordVendor.toLowerCase() !== vendor.toLowerCase()) return;
@@ -2722,6 +2746,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
           id: record.id,
           name: record.nama || getNama(record.id) || record.id,
           vendor: recordVendor,
+          workspace: record.workspaceName || record.workspaceSite || '',
           date: recordDate,
           start: start || '-',
           end: end || '-',
@@ -2736,12 +2761,17 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       if (type !== 'ijin') state.logs.forEach(function(record) { includeRecord(record, 'absensi'); });
       if (type !== 'absensi') state.ijinLogs.forEach(function(record) { includeRecord(record, 'ijin'); });
       rows.sort(function(a, b) { return b.date.localeCompare(a.date) || b.start.localeCompare(a.start); });
-      state.laporanData = { rows: rows, type: type, from: from, to: to, vendor: vendor };
+      state.laporanData = { rows: rows, type: type, from: from, to: to, vendor: vendor, workspaceId: workspaceId };
 
       var typeLabels = { absensi:'Laporan Absensi', ijin:'Laporan Izin Keluar', semua:'Laporan Semua Data' };
       var meta = rows.length + ' rekaman';
       if (from || to) meta += ' | ' + (from||'*') + ' s/d ' + (to||'*');
       if (vendor) meta += ' | Vendor: ' + vendor;
+      if (workspaceId) {
+        var workspaces = DB.get('soc_workspaces', []);
+        var selectedWorkspace = Array.isArray(workspaces) && workspaces.find(function(workspace) { return workspace.id === workspaceId; });
+        meta += ' | Workspace: ' + (selectedWorkspace ? selectedWorkspace.name : workspaceId);
+      }
       ui.setText('laporan-meta', meta);
       ui.setText('laporan-title', typeLabels[type] + (vendor ? ' — ' + vendor : ''));
 
@@ -2749,10 +2779,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       if (!thead || !tbody) return;
 
       var headers = type === 'ijin'
-        ? ['No','ID','Nama','Vendor','Tanggal','Keperluan','Keluar','Kembali','Durasi','Status']
+        ? ['No','ID','Nama','Vendor','Workspace','Tanggal','Keperluan','Keluar','Kembali','Durasi','Status']
         : type === 'semua'
-          ? ['No','Jenis','ID','Nama','Vendor','Tanggal','Waktu Mulai','Waktu Selesai','Durasi','Keterangan / Status']
-          : ['No','ID','Nama','Vendor','Tanggal','Check-In','Check-Out','Durasi','Keterangan'];
+          ? ['No','Jenis','ID','Nama','Vendor','Workspace','Tanggal','Waktu Mulai','Waktu Selesai','Durasi','Keterangan / Status']
+          : ['No','ID','Nama','Vendor','Workspace','Tanggal','Check-In','Check-Out','Durasi','Keterangan'];
       thead.innerHTML = '<tr>' + headers.map(function(header) { return '<th>' + esc(header) + '</th>'; }).join('') + '</tr>';
       if (!rows.length) {
         tbody.innerHTML = '<tr><td colspan="' + headers.length + '" class="table-empty">Tidak ada data untuk filter ini</td></tr>';
@@ -2761,10 +2791,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       }
       tbody.innerHTML = rows.map(function(row, index) {
         var values = type === 'ijin'
-          ? [index+1,row.id,row.name,row.vendor,row.date,row.reason,row.start,row.end,row.duration,row.status]
+          ? [index+1,row.id,row.name,row.vendor,row.workspace,row.date,row.reason,row.start,row.end,row.duration,row.status]
           : type === 'semua'
-            ? [index+1,row.kind === 'ijin' ? 'Izin Keluar' : 'Absensi',row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.kind === 'ijin' ? row.status : row.note]
-            : [index+1,row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.note];
+            ? [index+1,row.kind === 'ijin' ? 'Izin Keluar' : 'Absensi',row.id,row.name,row.vendor,row.workspace,row.date,row.start,row.end,row.duration,row.kind === 'ijin' ? row.status : row.note]
+            : [index+1,row.id,row.name,row.vendor,row.workspace,row.date,row.start,row.end,row.duration,row.note];
         return '<tr>' + values.map(function(value) { return '<td>' + esc(value == null || value === '' ? '-' : value) + '</td>'; }).join('') + '</tr>';
       }).join('');
       ui.toast(rows.length + ' data ditampilkan', 'success');
@@ -2777,10 +2807,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       if (!state.laporanData) return ui.toast('Generate laporan dulu', 'warning');
       var report = state.laporanData;
       var headers = report.type === 'ijin'
-        ? ['ID','Nama','Vendor','Tanggal','Keperluan','Keluar','Kembali','Durasi','Batas (menit)','Status']
+        ? ['ID','Nama','Vendor','Workspace','Tanggal','Keperluan','Keluar','Kembali','Durasi','Batas (menit)','Status']
         : report.type === 'semua'
-          ? ['Jenis','ID','Nama','Vendor','Tanggal','Waktu Mulai','Waktu Selesai','Durasi','Keterangan / Status']
-          : ['ID','Nama','Vendor','Tanggal','Check-In','Check-Out','Durasi','Keterangan'];
+          ? ['Jenis','ID','Nama','Vendor','Workspace','Tanggal','Waktu Mulai','Waktu Selesai','Durasi','Keterangan / Status']
+          : ['ID','Nama','Vendor','Workspace','Tanggal','Check-In','Check-Out','Durasi','Keterangan'];
       function csvCell(value) {
         var text = String(value == null ? '' : value);
         if (/^[\t\r ]*[=+\-@]/.test(text)) text = "'" + text;
@@ -2789,10 +2819,10 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
       var csv = headers.map(csvCell).join(',') + '\n';
       report.rows.forEach(function(row) {
         var values = report.type === 'ijin'
-          ? [row.id,row.name,row.vendor,row.date,row.reason,row.start,row.end,row.duration,row.limit,row.status]
+          ? [row.id,row.name,row.vendor,row.workspace,row.date,row.reason,row.start,row.end,row.duration,row.limit,row.status]
           : report.type === 'semua'
-            ? [row.kind === 'ijin' ? 'Izin Keluar' : 'Absensi',row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.kind === 'ijin' ? row.status : row.note]
-            : [row.id,row.name,row.vendor,row.date,row.start,row.end,row.duration,row.note];
+            ? [row.kind === 'ijin' ? 'Izin Keluar' : 'Absensi',row.id,row.name,row.vendor,row.workspace,row.date,row.start,row.end,row.duration,row.kind === 'ijin' ? row.status : row.note]
+            : [row.id,row.name,row.vendor,row.workspace,row.date,row.start,row.end,row.duration,row.note];
         csv += values.map(csvCell).join(',') + '\n';
       });
       downloadBlob(csv, 'SOC_Laporan_' + report.type + '_' + todayStr() + '.csv', 'text/csv');
