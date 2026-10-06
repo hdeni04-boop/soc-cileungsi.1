@@ -120,6 +120,7 @@ function findLeadingIcon(value) {
 }
 
 function hideSource(source) {
+  source.classList.add('soc-legacy-source');
   source.dataset.socLegacySource = 'true';
   source.setAttribute('aria-hidden', 'true');
   source.tabIndex = -1;
