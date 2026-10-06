@@ -337,16 +337,15 @@ function LegacySelect({ source }) {
   }, [source]);
 
   const placeholder = options.find((option) => option.isPlaceholder)?.label;
-  const visibleOptions = options.filter((option) => !option.isPlaceholder);
   return (
     <Select
       id={visibleId}
       className="soc-ant-select"
-      value={value || undefined}
+      value={value}
       placeholder={placeholder}
-      options={visibleOptions}
+      options={options}
       disabled={source.disabled}
-      showSearch={visibleOptions.length > 6}
+      showSearch={options.filter((option) => !option.isPlaceholder).length > 6}
       optionFilterProp="label"
       filterOption={(query, option) => String(option?.label?.props?.children?.[1]?.props?.children || option?.label || '').toLowerCase().includes(query.toLowerCase())}
       style={styleObject(source)}
