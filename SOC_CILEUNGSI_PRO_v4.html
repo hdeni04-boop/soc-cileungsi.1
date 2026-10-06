@@ -2947,6 +2947,8 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
     render.settings();
     render.importHistory();
     render.populateVendorFilters();
+    render.populateWorkspaceFilters();
+    window.addEventListener('soc:workspace-change', function() { render.populateWorkspaceFilters(); });
     impor.setupDrop();
     startIjinMonitor();
 
