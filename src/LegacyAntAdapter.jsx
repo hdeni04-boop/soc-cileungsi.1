@@ -76,8 +76,7 @@ const iconMap = {
   '+': PlusOutlined,
   '☰': SettingOutlined,
   '⛶': FullscreenOutlined,
-  '›': SearchOutlined,
-  'ID': UserOutlined
+  '›': SearchOutlined
 };
 
 const pageIcons = {
@@ -475,15 +474,20 @@ function LegacyModal({ source, content }) {
 }
 
 function LegacyUpload({ source }) {
-  const [copy, setCopy] = useState(() => source.textContent.trim());
+  const readCopy = () => {
+    const title = source.querySelector('.upload-zone-text')?.textContent.trim();
+    const hint = source.querySelector('.upload-zone-sub')?.textContent.trim();
+    if (title || hint) return { title: title || '', hint: hint || '' };
+    return { title: source.textContent.trim(), hint: '' };
+  };
+  const [copy, setCopy] = useState(readCopy);
   const input = document.getElementById('file-input');
   useEffect(() => {
-    const observer = new MutationObserver(() => setCopy(source.textContent.trim()));
+    const observer = new MutationObserver(() => setCopy(readCopy()));
     observer.observe(source, { childList: true, subtree: true, characterData: true });
     return () => observer.disconnect();
   }, [source]);
 
-  const description = copy.split(/\n+/).map((line) => line.trim()).filter(Boolean);
   const setNativeFiles = (file) => {
     if (!input || !file) return;
     const transfer = new DataTransfer();
@@ -504,8 +508,8 @@ function LegacyUpload({ source }) {
       onChange={({ file }) => setNativeFiles(file.originFileObj || file)}
     >
       <p className="ant-upload-drag-icon"><InboxOutlined /></p>
-      <p className="ant-upload-text">{description[0] || 'Pilih file untuk diimpor'}</p>
-      <p className="ant-upload-hint">{description.slice(1).join(' ') || 'Excel atau CSV'}</p>
+      <p className="ant-upload-text">{copy.title || 'Pilih file untuk diimpor'}</p>
+      <p className="ant-upload-hint">{copy.hint || 'Excel atau CSV'}</p>
     </Upload.Dragger>
   );
 }
