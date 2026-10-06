@@ -11,7 +11,7 @@ export default defineConfig({
       configureServer(server) {
         server.middlewares.use((req, res, next) => {
           if (req.url === '/' || req.url?.startsWith('/?')) {
-            req.url = entryName + (req.url.slice(1) || '');
+            req.url = '/' + entryName + req.url.slice(1);
           }
           next();
         });
@@ -19,7 +19,7 @@ export default defineConfig({
       configurePreviewServer(server) {
         server.middlewares.use((req, res, next) => {
           if (req.url === '/' || req.url?.startsWith('/?')) {
-            req.url = entryName + (req.url.slice(1) || '');
+            req.url = '/' + entryName + req.url.slice(1);
           }
           next();
         });
