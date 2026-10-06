@@ -1,0 +1,105 @@
+.manpower-page {
+  position: fixed;
+  inset: 0 0 0 248px;
+  z-index: 120;
+  overflow: auto;
+  padding: 26px 30px 48px;
+  background: #f4f6f9;
+  color: #202a38;
+  font-family: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.manpower-content { width: 100%; max-width: 1600px; margin: 0 auto; }
+.manpower-breadcrumb { margin-bottom: 15px; color: #8792a1; font-size: 10px; font-weight: 800; letter-spacing: 1.35px; }
+.manpower-breadcrumb span { margin: 0 7px; color: #c0c7d0; }
+.manpower-page-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 22px; }
+.manpower-title-row { display: flex; align-items: center; gap: 13px; }
+.manpower-title-icon { display: grid; width: 44px; height: 44px; place-items: center; border-radius: 12px; background: #fff0ed; color: #cb2e21; font-size: 20px; }
+.manpower-page-header h1 { margin: 0; color: #172231; font-size: 23px; font-weight: 800; letter-spacing: -.55px; }
+.manpower-page-header p { margin: 4px 0 0; color: #7b8795; font-size: 12px; }
+.manpower-save-button { display: inline-flex; min-height: 40px; align-items: center; justify-content: center; gap: 9px; padding: 0 15px; border: 0; border-radius: 7px; background: #ae241f; color: white; font: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .16s, transform .16s; }
+.manpower-save-button:hover { transform: translateY(-1px); background: #921d19; }
+.manpower-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 13px; margin-bottom: 18px; }
+.manpower-summary-card { display: flex; min-height: 105px; flex-direction: column; justify-content: center; padding: 15px 18px; border: 1px solid #e8ebef; border-radius: 9px; background: white; box-shadow: 0 2px 7px rgba(27, 39, 54, .025); }
+.manpower-summary-label { color: #8b95a2; font-size: 9px; font-weight: 800; letter-spacing: 1px; }
+.manpower-summary-card strong { display: flex; align-items: center; gap: 7px; margin-top: 6px; color: #202b39; font-size: 21px; font-weight: 800; line-height: 1.25; }
+.manpower-summary-card strong small { color: #8b95a2; font-size: 11px; font-weight: 600; }
+.manpower-summary-caption { margin-top: 3px; color: #99a2ad; font-size: 10px; }
+.manpower-summary-card .manpower-status-unsaved, .manpower-summary-card .manpower-status-saved { font-size: 13px; }
+.manpower-status-saved { color: #258553 !important; }
+.manpower-status-unsaved { color: #b36d08 !important; }
+.manpower-status-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.manpower-table-card { overflow: hidden; border: 1px solid #e5e8ec; border-radius: 9px; background: #fff; box-shadow: 0 2px 8px rgba(27, 39, 54, .03); }
+.manpower-table-toolbar { display: flex; min-height: 74px; align-items: center; justify-content: space-between; gap: 16px; padding: 13px 18px; }
+.manpower-table-toolbar h2 { margin: 0; color: #202a38; font-size: 14px; font-weight: 800; }
+.manpower-table-toolbar p { margin: 4px 0 0; color: #8b95a2; font-size: 10px; }
+.manpower-date-filter { display: flex; height: 35px; align-items: center; gap: 7px; padding: 0 9px; border: 1px solid #e2e6eb; border-radius: 6px; color: #677483; font-size: 10px; font-weight: 700; }
+.manpower-date-filter select { max-width: 125px; border: 0; outline: 0; background: transparent; color: #263342; font: inherit; cursor: pointer; }
+.manpower-legend { display: flex; min-height: 38px; flex-wrap: wrap; align-items: center; gap: 16px; padding: 0 18px; border-top: 1px solid #f0f2f4; color: #788391; font-size: 9px; }
+.manpower-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.manpower-legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.manpower-legend-negative { background: #cf3c37; }
+.manpower-legend-neutral { background: #97a1ad; }
+.manpower-legend-positive { background: #258553; }
+.manpower-save-message { margin-left: auto; color: #34785a; }
+.manpower-table-scroll { max-height: min(64vh, 670px); overflow: auto; border-top: 1px solid #e5e8ec; }
+.manpower-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; color: #384351; font-size: 10px; font-variant-numeric: tabular-nums; }
+.manpower-table th, .manpower-table td { min-width: 58px; height: 34px; padding: 0 8px; border-right: 1px solid #e9ebee; border-bottom: 1px solid #e9ebee; text-align: center; white-space: nowrap; }
+.manpower-table thead th { position: sticky; z-index: 5; font-weight: 800; }
+.manpower-table thead tr:nth-child(1) th { top: 0; height: 38px; }
+.manpower-table thead tr:nth-child(2) th { top: 38px; height: 38px; }
+.manpower-table thead tr:nth-child(3) th { top: 76px; height: 32px; }
+.manpower-table thead .manpower-sticky-date, .manpower-table thead .manpower-sticky-shift { z-index: 8; }
+.manpower-table .manpower-sticky-date { position: sticky; left: 0; min-width: 100px; width: 100px; }
+.manpower-table .manpower-sticky-shift { position: sticky; left: 100px; min-width: 108px; width: 108px; box-shadow: 3px 0 5px -4px rgba(28, 39, 52, .55); }
+.manpower-major-header .manpower-sticky-date, .manpower-major-header .manpower-sticky-shift, .manpower-major-primary { background: #a9231f; color: white; }
+.manpower-major-inbound { background: #176b48; color: white; }
+.manpower-category-header th { background: #e8edf1; color: #364454; }
+.manpower-field-header th { background: #f7f3e8; color: #59616b; font-size: 9px; }
+.manpower-table thead .manpower-unplan-header { background: #c83b37; color: #fff; }
+.manpower-table tbody .manpower-sticky-date, .manpower-table tbody .manpower-sticky-shift { z-index: 2; background: #fff; font-weight: 700; }
+.manpower-table tbody tr:nth-child(even) td { background-color: #fafbfc; }
+.manpower-table tbody tr:nth-child(even) .manpower-sticky-date, .manpower-table tbody tr:nth-child(even) .manpower-sticky-shift { background-color: #fafbfc; }
+.manpower-table tbody tr:hover td { background-color: #f4f8fb; }
+.manpower-table tbody tr:hover .manpower-sticky-date, .manpower-table tbody tr:hover .manpower-sticky-shift { background-color: #f4f8fb; }
+.manpower-table tbody .manpower-unplan-cell { background: #fff1f0; color: #bf302d; }
+.manpower-table tbody tr:nth-child(even) .manpower-unplan-cell { background: #fff0ef; }
+.manpower-table tbody tr:hover .manpower-unplan-cell { background: #ffe4e1; }
+.manpower-editable { min-width: 27px; padding: 3px 5px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: inherit; font: inherit; font-variant-numeric: tabular-nums; cursor: pointer; }
+.manpower-editable:hover, .manpower-editable:focus-visible { border-color: #bbc8d5; outline: none; background: white; box-shadow: 0 0 0 2px rgba(62, 105, 148, .08); }
+.manpower-edit-input { width: 42px; height: 25px; padding: 0 2px; border: 1px solid #8da9c1; border-radius: 4px; outline: 2px solid rgba(55, 112, 161, .1); color: #273646; font: inherit; text-align: center; }
+.manpower-gap-negative { color: #c93430 !important; font-weight: 800; }
+.manpower-gap-neutral { color: #798390 !important; font-weight: 700; }
+.manpower-gap-positive { color: #238251 !important; font-weight: 800; }
+.manpower-table tfoot th { position: sticky; z-index: 4; bottom: 0; height: 39px; background: #f1f0e9; color: #323c48; font-size: 10px; font-weight: 900; }
+.manpower-table tfoot .manpower-sticky-date { z-index: 6; left: 0; text-align: left; padding-left: 14px; }
+.manpower-table tfoot .manpower-unplan-cell { background: #f8d9d6; color: #ad2825; }
+.manpower-empty-cell { height: 110px !important; color: #929ba6; }
+.manpower-table-footer { display: flex; justify-content: space-between; gap: 12px; padding: 11px 17px; color: #919aa5; font-size: 9px; }
+.manpower-table-footer strong { color: #55616e; }
+
+@media (max-width: 1100px) {
+  .manpower-page { padding: 22px 18px 40px; }
+  .manpower-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .manpower-table-scroll { max-height: 62vh; }
+}
+
+@media (max-width: 900px) {
+  .manpower-page { inset: 54px 0 0; padding: 19px 16px 36px; }
+}
+
+@media (max-width: 600px) {
+  .manpower-page { padding: 16px 10px 30px; }
+  .manpower-page-header { align-items: flex-start; }
+  .manpower-page-header h1 { font-size: 17px; }
+  .manpower-title-icon { width: 38px; height: 38px; }
+  .manpower-save-button { min-height: 35px; padding: 0 9px; font-size: 10px; }
+  .manpower-summary { gap: 8px; }
+  .manpower-summary-card { min-height: 91px; padding: 11px; }
+  .manpower-summary-card strong { font-size: 17px; }
+  .manpower-table-toolbar { align-items: flex-start; padding: 12px; }
+  .manpower-date-filter { flex-wrap: wrap; height: auto; min-height: 35px; padding: 7px; }
+  .manpower-legend { gap: 8px 12px; padding: 8px 12px; }
+  .manpower-save-message { margin-left: 0; }
+  .manpower-table-footer { flex-direction: column; }
+}
