@@ -141,7 +141,7 @@ function SidebarContent({
       <div className="soc-brand">
         <div className="soc-status"><span /> Sistem Aktif</div>
         <Typography.Title level={5}>SOC CILEUNGSI</Typography.Title>
-        <Typography.Text type="secondary">Bontot DC · Workforce</Typography.Text>
+        <Typography.Text type="secondary">{activeWorkspace ? `${activeWorkspace.name} · ${activeWorkspace.site}` : 'Workspace belum dipilih'}</Typography.Text>
       </div>
       {!mobile && (
         <div className="soc-clock">
